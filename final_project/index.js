@@ -15,15 +15,17 @@ app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUni
 app.use("/customer/auth/*", function auth(req,res,next){
     //Write the authenication mechanism here
     let token = req.header('Authorization');
-    if(!token) return req.statusCode(401).send('No Token')
+    if(!token) return res.status(401).send('No Token')
     if(token.startsWith('Bearer')) {
         token = token.slice(7, token.length).trimStart();
     }
     const verificationStatus = jwt.verify(token, JWT_SECRET)
-    if(verificationStatus.username == req.username) {
+    console.log(verificationStatus)
+    if(verificationStatus) {
+        res.locals.token = verificationStatus
         next()
     }
-    return res
+    return res.status(401).send('User is not authorized')
 });
  
 const PORT =5000;

@@ -38,19 +38,28 @@ regd_users.post("/login", (req,res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here
-  const isbnBook = books[req.params.isbn];
-  if(!isbnBook) return res.status(404).json({message: `Error: Book not found for ISBN ${req.params.isbn}`})
-  if(!req.body.review) return res.status(401).json({message: "Review is missing."});
-  isbnBook['reviews'].username = req.body.review
-  return res.status(200).json(isbnBook);
+  const user = users.filter(user => user.username == res.locals.token.username) 
+  if(user.length > 0) {
+    const isbnBook = books[req.params.isbn];
+    if(!isbnBook) return res.status(404).json({message: `Error: Book not found for ISBN ${req.params.isbn}`})
+    if(!req.body.review) return res.status(401).json({message: "Review is missing."});
+    isbnBook['reviews'].username = req.body.review
+    return res.status(200).json(isbnBook);
+  }
+  return res.status(401).send('User is not authorized')
 });
 
 // Delete a book review
 regd_users.delete("/auth/review/:isbn", (req, res) => {
-  const isbnBook = books[req.params.isbn];
-  if(!isbnBook) return res.status(404).json({message: `Error: Book not found for ISBN ${req.params.isbn}`})
-  delete isbnBook['reviews'].username
-  return res.status(200).json(isbnBook);
+  const user = users.filter(user => user.username == res.locals.token.username) 
+  if(user.length > 0) {
+    const isbnBook = books[req.params.isbn];
+    if(!isbnBook) return res.status(404).json({message: `Error: Book not found for ISBN ${req.params.isbn}`})
+    delete isbnBook['reviews'].username
+    console.log(books)
+    return res.status(200).json(isbnBook);
+  }
+  return res.status(401).send('User is not authorized')
 });
 
 module.exports.authenticated = regd_users;
